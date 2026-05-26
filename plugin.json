@@ -17,6 +17,30 @@
       "tag": "nsfw"
     },
     {
+      "name": "Cucumber Manga",
+      "author": "DrLee",
+      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/cucumbermanga/plugin.zip",
+      "version": 1,
+      "source": "https://cucumbermanga.com",
+      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/cucumbermanga/icon.png",
+      "description": "Đọc manga BL/Yaoi trên Cucumber Manga",
+      "type": "comic",
+      "locale": "vi_VN",
+      "tag": "nsfw"
+    },
+    {
+      "name": "Dualeotruyen GL",
+      "author": "DrLee",
+      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/dualeotruyengl/plugin.zip",
+      "version": 1,
+      "source": "https://dualeotruyengl.com",
+      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/dualeotruyengl/icon.png",
+      "description": "Đọc truyện tranh GL (yuri) trên Dualeotruyen GL",
+      "type": "comic",
+      "locale": "vi_VN",
+      "tag": "nsfw"
+    },
+    {
       "name": "Lazy Comics",
       "author": "DrLee",
       "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/lazycomics/plugin.zip",

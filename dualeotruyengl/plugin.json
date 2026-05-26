@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "name": "Dualeotruyen GL",
+    "author": "DrLee",
+    "version": 1,
+    "source": "https://dualeotruyengl.com",
+    "icon": "https://dualeotruyengl.com/favicon.ico",
+    "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?dualeotruyengl\\.com\\/[^\\s]*",
+    "description": "Đọc truyện tranh GL (yuri) trên Dualeotruyen GL",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "comic",
+    "tag": "nsfw"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "thread_num": 1,
+    "delay": 500
+  }
+}

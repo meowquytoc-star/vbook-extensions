@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "name": "Cucumber Manga",
+    "author": "DrLee",
+    "version": 1,
+    "source": "https://cucumbermanga.com",
+    "icon": "https://cucumbermanga.com/favicon.ico",
+    "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?cucumbermanga\\.com\\/[^\\s]*",
+    "description": "Đọc manga BL/Yaoi trên Cucumber Manga",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "comic",
+    "tag": "nsfw"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "thread_num": 1,
+    "delay": 500
+  }
+}
