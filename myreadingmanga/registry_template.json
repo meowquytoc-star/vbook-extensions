@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "author": "your_github_username",
+    "description": "Kho extension Vbook cá nhân"
+  },
+  "data": [
+    {
+      "name": "MyReadingManga",
+      "author": "your_github_username",
+      "path": "https://raw.githubusercontent.com/YOUR_GITHUB/YOUR_REPO/main/myreadingmanga/plugin.zip",
+      "version": 1,
+      "source": "https://myreadingmanga.info",
+      "icon": "https://raw.githubusercontent.com/YOUR_GITHUB/YOUR_REPO/main/myreadingmanga/icon.png",
+      "description": "Read BL/Yaoi manga on MyReadingManga.info",
+      "type": "comic",
+      "locale": "en_US",
+      "tag": "nsfw"
+    }
+  ]
+}

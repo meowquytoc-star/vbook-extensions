@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "name": "MyReadingManga",
+    "author": "madokalb112",
+    "version": 1,
+    "source": "https://myreadingmanga.info",
+    "regexp": "myreadingmanga\\.info(/[0-9a-z][0-9a-z\\-]+/?)?$",
+    "description": "Read BL/Yaoi manga on MyReadingManga.info",
+    "locale": "en_US",
+    "language": "javascript",
+    "type": "comic",
+    "nsfw": true
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}
