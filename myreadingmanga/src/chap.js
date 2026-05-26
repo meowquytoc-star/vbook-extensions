@@ -48,7 +48,7 @@ function execute(url) {
         src = normalizeImage(src);
         if (!validImage(src) || seen[src]) return;
         seen[src] = true;
-        data.push({ link: src, headers: imageHeaders(url) });
+        data.push({ link: src });
     });
 
     // Fallback 1: any image inside the article
@@ -59,7 +59,7 @@ function execute(url) {
             src = normalizeImage(src);
             if (!validImage(src) || seen[src]) return;
             seen[src] = true;
-            data.push({ link: src, headers: imageHeaders(url) });
+            data.push({ link: src });
         });
     }
 
@@ -75,7 +75,7 @@ function execute(url) {
             if (/-\d+x\d+\.(jpg|jpeg|png|webp)$/i.test(src)) continue;
             if (seen[src]) continue;
             seen[src] = true;
-            data.push({ link: src, headers: imageHeaders(url) });
+            data.push({ link: src });
         }
     }
 

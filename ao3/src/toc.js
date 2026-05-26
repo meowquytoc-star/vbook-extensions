@@ -8,7 +8,7 @@ function execute(url) {
 
     // Multi-chapter: navigate work?view_full_work=true or parse chapter index
     let chapSelect = doc.select('#chapter_index select#jump option, #selected_id option');
-    if (chapSelect && chapSelect.size() > 0) {
+    if (chapSelect && chapSelect.first()) {
         chapSelect.forEach(function(opt) {
             let val = cleanText(opt.attr('value') || '');
             let label = cleanText(opt.text());
