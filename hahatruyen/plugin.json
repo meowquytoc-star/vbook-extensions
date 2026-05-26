@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "name": "HaHa Truyện",
+    "author": "DrLee",
+    "version": 1,
+    "source": "https://hahatruyen.com.vn",
+    "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?hahatruyen\\.com\\.vn\\/[^\\s]*",
+    "description": "Đọc truyện ngôn tình sắc trên HaHa Truyện",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "novel",
+    "tag": "nsfw"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "thread_num": 1,
+    "delay": 500
+  }
+}

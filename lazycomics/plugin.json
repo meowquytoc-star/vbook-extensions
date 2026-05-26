@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "name": "Lazy Comics",
+    "author": "DrLee",
+    "version": 1,
+    "source": "https://lazycomics.net",
+    "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?lazycomics\\.net\\/[^\\s]*",
+    "description": "Đọc truyện tranh BL/Yaoi trên Lazy Comics",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "comic",
+    "tag": "nsfw"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "gen": "gen.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  },
+  "config": {
+    "thread_num": 1,
+    "delay": 500
+  }
+}
