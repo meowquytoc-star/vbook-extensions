@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "author": "DrLee",
+    "description": "Vbook extensions by DrLee"
+  },
+  "data": [
+    {
+      "name": "MyReadingManga",
+      "author": "DrLee",
+      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/myreadingmanga/plugin.zip",
+      "version": 1,
+      "source": "https://myreadingmanga.info",
+      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/myreadingmanga/icon.png",
+      "description": "Read BL/Yaoi manga on MyReadingManga.info",
+      "type": "comic",
+      "locale": "en_US",
+      "tag": "nsfw"
+    }
+  ]
+}
