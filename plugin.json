@@ -17,6 +17,18 @@
       "tag": "nsfw"
     },
     {
+      "name": "Archive of Our Own",
+      "author": "DrLee",
+      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/ao3/plugin.zip",
+      "version": 1,
+      "source": "https://archiveofourown.org",
+      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/ao3/icon.png",
+      "description": "Read fanfiction on Archive of Our Own (AO3)",
+      "type": "novel",
+      "locale": "en_US",
+      "tag": "nsfw"
+    },
+    {
       "name": "07br",
       "author": "Đường đen",
       "path": "https://raw.githubusercontent.com/duongden/vbook/main/Novel_Zh/07br/plugin.zip",
