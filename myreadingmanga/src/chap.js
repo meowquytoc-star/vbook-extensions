@@ -26,8 +26,8 @@ function imageAttr(e) {
 
 function imageHeaders(referer) {
     return {
-        "Referer": referer || BASE_URL + "/",
-        "User-Agent": "Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36"
+        'Referer': referer || BASE_URL + '/',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36'
     };
 }
 
