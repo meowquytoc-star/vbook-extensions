@@ -1,22 +1,27 @@
 {
   "metadata": {
     "name": "MyReadingManga",
-    "author": "madokalb112",
-    "version": 1,
+    "author": "DrLee",
+    "version": 3,
     "source": "https://myreadingmanga.info",
-    "regexp": "myreadingmanga\\.info(/[0-9a-z][0-9a-z\\-]+/?)?$",
+    "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?myreadingmanga\\.info\\/[^\\s]*",
     "description": "Read BL/Yaoi manga on MyReadingManga.info",
     "locale": "en_US",
     "language": "javascript",
     "type": "comic",
-    "nsfw": true
+    "tag": "nsfw"
   },
   "script": {
     "home": "home.js",
     "genre": "genre.js",
-    "detail": "detail.js",
+    "gen": "gen.js",
     "search": "search.js",
+    "detail": "detail.js",
     "toc": "toc.js",
     "chap": "chap.js"
+  },
+  "config": {
+    "thread_num": 1,
+    "delay": 1000
   }
 }
