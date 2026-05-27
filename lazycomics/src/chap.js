@@ -7,14 +7,18 @@ function execute(url) {
     let data = [];
     let seen = {};
 
-    doc.select('#manga-images img, .manga-images-container img, .chapter-content img, img[src*="fastcomic"], img[src*="/uploads/"]').forEach(function(e) {
-        let src = e.attr('src') || e.attr('data-src') || e.attr('data-lazy-src') || '';
-        if (src.startsWith('//')) src = 'https:' + src;
-        if (!src || seen[src]) return;
-        if (!/\.(jpg|jpeg|png|webp|gif)/i.test(src)) return;
+    // Images are stored in JS variables on the page, not in img tags.
+    // Regex-scan the raw HTML for all chapter image URLs.
+    let html = '';
+    try { html = doc.html(); } catch(e) {}
+    let re = /(https?:\/\/[^\s"'<>]*fastcomic[^\s"'<>]*\.(?:webp|jpg|jpeg|png|gif))/ig;
+    let m;
+    while ((m = re.exec(html)) !== null) {
+        let src = m[1];
+        if (seen[src]) continue;
         seen[src] = true;
         data.push({ link: src });
-    });
+    }
 
     if (data.length === 0) return Response.error("No images found.");
     return Response.success(data);

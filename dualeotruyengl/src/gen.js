@@ -1,7 +1,16 @@
 load('config.js');
 
 function execute(url, page) {
-    let pageUrl = page > 1 ? url + (url.indexOf('?') >= 0 ? '&' : '?') + 'page=' + page : url;
+    let p = '' + (page || '');
+    let pageUrl;
+    if (!p || p === '1') {
+        pageUrl = url;
+    } else if (/^https?:\/\//i.test(p)) {
+        pageUrl = p;
+    } else {
+        pageUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'page=' + p;
+    }
+
     let doc = getDoc(pageUrl);
     if (!doc) return Response.error("Cannot load genre page.");
 
