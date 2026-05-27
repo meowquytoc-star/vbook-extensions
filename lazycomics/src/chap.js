@@ -7,8 +7,9 @@ function execute(url) {
     let data = [];
     let seen = {};
 
-    doc.select('#manga-images img, .manga-images-container img').forEach(function(e) {
+    doc.select('#manga-images img, .manga-images-container img, .chapter-content img, img[src*="fastcomic"], img[src*="/uploads/"]').forEach(function(e) {
         let src = e.attr('src') || e.attr('data-src') || e.attr('data-lazy-src') || '';
+        if (src.startsWith('//')) src = 'https:' + src;
         if (!src || seen[src]) return;
         if (!/\.(jpg|jpeg|png|webp|gif)/i.test(src)) return;
         seen[src] = true;

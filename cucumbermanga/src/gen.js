@@ -8,6 +8,7 @@ function execute(url, page) {
     let items = parseMadaraListing(doc);
     if (items.length === 0) return Response.error("No stories found.");
 
-    let hasMore = !!nextPageUrl(doc);
-    return Response.success(items, hasMore);
+    let nextUrl = nextPageUrl(doc);
+    let currentPage = parseInt(page) || 1;
+    return Response.success(items, nextUrl ? String(currentPage + 1) : null);
 }

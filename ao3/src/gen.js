@@ -16,19 +16,5 @@ function execute(url, page) {
         }
     });
 
-    if (data.length === 0 && isFandomListPage(url)) {
-        doc.select('.index a[href*="/tags/"]').forEach(function(e) {
-            let href = e.attr('href') || '';
-            if (href.indexOf('/tags/') === -1) return;
-            let link = normalizeUrl(href);
-            if (link.indexOf('/works') === -1) link = link + '/works';
-            link = adultUrl(link);
-            if (seen[link]) return;
-            seen[link] = true;
-            let name = cleanText(e.text());
-            if (name && data.length < 100) data.push({ name: name, link: link, cover: '' });
-        });
-    }
-
     return Response.success(data, nextPage(doc));
 }
