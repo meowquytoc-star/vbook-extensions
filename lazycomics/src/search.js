@@ -2,7 +2,7 @@ load('config.js');
 
 function execute(keyword, page) {
     if (!keyword) return Response.error("No keyword.");
-    let res = fetch(BASE_URL + '/api/search-story?keyword=' + encodeURIComponent(keyword));
+    let res = fetch('https://lazycomics.net/api/search-story?keyword=' + encodeURIComponent(keyword));
     if (!res || !res.ok) return Response.error("Search failed.");
 
     let items = [];
@@ -12,10 +12,10 @@ function execute(keyword, page) {
     let data = items.map(function(item) {
         return {
             name: item.title || '',
-            link: BASE_URL + '/truyen/' + (item.slug || ''),
+            link: 'https://lazycomics.net/truyen/' + (item.slug || ''),
             cover: coverUrl(item.cover || ''),
             description: '',
-            host: BASE_URL
+            host: 'https://lazycomics.net'
         };
     }).filter(function(i) { return i.name && i.link; });
 

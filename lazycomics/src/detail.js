@@ -8,7 +8,7 @@ function execute(url) {
         ? doc.select('h1.manga-title, h1').first().text() : '');
 
     let cover = '';
-    let imgEl = doc.select('img[src*="storage"], img[src*="story_avatars"]').first();
+    let imgEl = doc.select('.manga-cover img.cover-image, img[src*="story_avatars"]').first();
     if (imgEl) cover = coverUrl(imgEl.attr('src') || imgEl.attr('data-src') || '');
     if (!cover) {
         let og = doc.select('meta[property="og:image"]').first();

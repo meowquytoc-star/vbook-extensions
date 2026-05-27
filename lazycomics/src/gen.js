@@ -8,6 +8,8 @@ function execute(url, page) {
     let data = parseComicItems(doc);
     if (data.length === 0) return Response.error("No stories found.");
 
-    let hasMore = !!nextPage(doc, page);
-    return Response.success(data, hasMore);
+    let currentPage = parseInt(page) || 1;
+    let nextPageUrl = nextPage(doc, currentPage);
+    let token = nextPageUrl ? String(currentPage + 1) : null;
+    return Response.success(data, token);
 }
