@@ -1,7 +1,7 @@
 load('config.js');
 
 function execute() {
-    let doc = getDoc(BASE_URL + '/');
+    let doc = getDoc('https://lazycomics.net/');
     let data = [];
     let seen = {};
 
@@ -18,13 +18,13 @@ function execute() {
 
     if (data.length === 0) {
         data = [
-            { title: "Boy Love",        input: BASE_URL + '/the-loai/boy-love',   script: 'gen.js' },
-            { title: "Yaoi",            input: BASE_URL + '/the-loai/yaoi',       script: 'gen.js' },
-            { title: "Người Lớn (18+)", input: BASE_URL + '/the-loai/nguoi-lon',  script: 'gen.js' },
-            { title: "ABO",             input: BASE_URL + '/the-loai/abo',        script: 'gen.js' },
-            { title: "Manhwa",          input: BASE_URL + '/the-loai/manhwa',     script: 'gen.js' },
-            { title: "Manga",           input: BASE_URL + '/the-loai/manga',      script: 'gen.js' },
-            { title: "Webtoon",         input: BASE_URL + '/the-loai/webtoon',    script: 'gen.js' }
+            { title: "Boy Love",        input: "https://lazycomics.net/the-loai/boy-love",   script: 'gen.js' },
+            { title: "Yaoi",            input: "https://lazycomics.net/the-loai/yaoi",       script: 'gen.js' },
+            { title: "Người Lớn (18+)", input: "https://lazycomics.net/the-loai/nguoi-lon",  script: 'gen.js' },
+            { title: "ABO",             input: "https://lazycomics.net/the-loai/abo",        script: 'gen.js' },
+            { title: "Manhwa",          input: "https://lazycomics.net/the-loai/manhwa",     script: 'gen.js' },
+            { title: "Manga",           input: "https://lazycomics.net/the-loai/manga",      script: 'gen.js' },
+            { title: "Webtoon",         input: "https://lazycomics.net/the-loai/webtoon",    script: 'gen.js' }
         ];
     }
     return Response.success(data);

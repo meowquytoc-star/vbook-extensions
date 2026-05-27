@@ -1,7 +1,7 @@
 load('config.js');
 
 function execute() {
-    let doc = getDoc(BASE_URL + '/');
+    let doc = getDoc('https://dualeotruyengl.com/');
     let data = [];
     let seen = {};
 
@@ -16,7 +16,7 @@ function execute() {
     }
 
     if (data.length === 0) {
-        data = [{ title: 'Tất cả', input: BASE_URL + '/', script: 'gen.js' }];
+        data = [{ title: 'Tất cả', input: 'https://dualeotruyengl.com/', script: 'gen.js' }];
     }
     return Response.success(data);
 }
