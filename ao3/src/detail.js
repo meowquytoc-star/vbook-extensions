@@ -39,6 +39,6 @@ function execute(url) {
         description: description,
         author: author,
         tags: tags,
-        link: url
+        host: BASE_URL
     });
 }

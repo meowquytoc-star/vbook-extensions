@@ -14,17 +14,15 @@ function execute(url) {
             let label = cleanText(opt.text());
             if (!val || !label) return;
             let chapUrl = '';
-            // value may be full URL or chapter id
             if (/^https?:\/\//i.test(val)) {
                 chapUrl = adultUrl(val);
             } else {
-                // Extract work id from url
                 let wMatch = ('' + url).match(/\/works\/(\d+)/);
                 if (wMatch) {
                     chapUrl = adultUrl(BASE_URL + '/works/' + wMatch[1] + '/chapters/' + val);
                 }
             }
-            if (chapUrl) chapters.push({ name: label, link: chapUrl });
+            if (chapUrl) chapters.push({ name: label, url: chapUrl, host: BASE_URL });
         });
     }
 
@@ -32,7 +30,7 @@ function execute(url) {
     if (chapters.length === 0) {
         let workTitle = cleanText(doc.select('h2.title.heading').first()
             ? doc.select('h2.title.heading').first().text() : 'Chapter 1');
-        chapters.push({ name: workTitle || 'Chapter 1', link: adultUrl(url) });
+        chapters.push({ name: workTitle || 'Chapter 1', url: adultUrl(url), host: BASE_URL });
     }
 
     return Response.success(chapters);

@@ -25,5 +25,5 @@ function execute(url) {
         desc = tag ? cleanText(tag) : cleanText(descEl.text());
     }
 
-    return Response.success({ name: name, cover: cover, description: desc, link: url });
+    return Response.success({ name: name, cover: cover, description: desc, host: BASE_URL });
 }

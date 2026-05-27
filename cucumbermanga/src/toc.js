@@ -13,7 +13,7 @@ function execute(url) {
         seen[link] = true;
         let name = cleanText(e.text() || e.attr('title') || '');
         if (!name) name = 'Chapter';
-        chapters.push({ name: name, link: link });
+        chapters.push({ name: name, url: link, host: BASE_URL });
     });
 
     chapters.reverse();

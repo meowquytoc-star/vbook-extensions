@@ -8,6 +8,6 @@ function execute(url, page) {
     let items = parseListing(doc);
     if (items.length === 0) return Response.error("No stories found.");
 
-    let hasMore = !!nextPageUrl(doc, pageUrl);
-    return Response.success(items, hasMore);
+    let nextUrl = nextPageUrl(doc, pageUrl);
+    return Response.success(items, nextUrl || null);
 }

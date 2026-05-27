@@ -19,5 +19,5 @@ function execute(url) {
     let descEl = doc.select('meta[name="description"]').first();
     if (descEl) desc = cleanText(descEl.attr('content') || '');
 
-    return Response.success({ name: name, cover: cover, description: desc, link: url });
+    return Response.success({ name: name, cover: cover, description: desc, host: BASE_URL });
 }

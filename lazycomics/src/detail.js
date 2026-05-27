@@ -23,5 +23,5 @@ function execute(url) {
         if (bodyEl) desc = cleanText(bodyEl.text());
     }
 
-    return Response.success({ name: name, cover: cover, description: desc, link: url });
+    return Response.success({ name: name, cover: cover, description: desc, host: BASE_URL });
 }
