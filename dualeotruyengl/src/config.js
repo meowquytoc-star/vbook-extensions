@@ -34,7 +34,7 @@ function parseListing(doc) {
         let cover = '';
         if (img) cover = img.attr('data-src') || img.attr('src') || '';
         if (cover && cover.startsWith('//')) cover = 'https:' + cover;
-        items.push({ name: name, link: link, cover: cover });
+        items.push({ name: name, link: link, cover: cover, description: '', host: BASE_URL });
     });
     return items;
 }

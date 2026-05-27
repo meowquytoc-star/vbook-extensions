@@ -31,13 +31,13 @@ function listPageUrl(base, page) {
 
 function nextPage(doc, currentPage) {
     let p = parseInt(currentPage) || 1;
-    let next = null;
+    let found = null;
     doc.select('.pagination-number a').forEach(function(a) {
         let href = a.attr('href') || '';
         let m = href.match(/[?&]page=(\d+)/);
-        if (m && parseInt(m[1]) === p + 1) next = normalizeUrl(href);
+        if (m && parseInt(m[1]) === p + 1) found = normalizeUrl(href);
     });
-    return next;
+    return found;
 }
 
 function coverUrl(path) {
@@ -61,7 +61,7 @@ function parseComicItems(doc) {
         let img = item.select('img').first();
         let cover = '';
         if (img) cover = coverUrl(img.attr('src') || img.attr('data-src') || '');
-        data.push({ name: name, link: link, cover: cover });
+        data.push({ name: name, link: link, cover: cover, description: '', host: BASE_URL });
     });
     return data;
 }

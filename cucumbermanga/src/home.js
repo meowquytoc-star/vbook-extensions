@@ -1,13 +1,9 @@
 load('config.js');
 
-function execute(page) {
-    let url = page > 1 ? BASE_URL + '/manga-2/page/' + page + '/' : BASE_URL + '/manga-2/';
-    let doc = getDoc(url);
-    if (!doc) return Response.error("Cannot load home page.");
-
-    let items = parseMadaraListing(doc);
-    if (items.length === 0) return Response.error("No stories found.");
-
-    let hasMore = !!nextPageUrl(doc);
-    return Response.success(items, hasMore);
+function execute() {
+    return Response.success([
+        { title: "Tất cả Manga",  input: BASE_URL + '/manga-2/',                 script: 'gen.js' },
+        { title: "Mới cập nhật",  input: BASE_URL + '/manga-2/?orderby=latest',  script: 'gen.js' },
+        { title: "Hot nhất",      input: BASE_URL + '/manga-2/?orderby=trending', script: 'gen.js' }
+    ]);
 }
