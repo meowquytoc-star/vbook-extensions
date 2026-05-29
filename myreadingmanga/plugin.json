@@ -2,8 +2,9 @@
   "metadata": {
     "name": "MyReadingManga",
     "author": "DrLee",
-    "version": 3,
+    "version": 4,
     "source": "https://myreadingmanga.info",
+    "icon": "https://myreadingmanga.info/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?myreadingmanga\\.info\\/[^\\s]*",
     "description": "Read BL/Yaoi manga on MyReadingManga.info",
     "locale": "en_US",

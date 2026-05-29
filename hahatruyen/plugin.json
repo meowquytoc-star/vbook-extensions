@@ -2,8 +2,9 @@
   "metadata": {
     "name": "HaHa Truyện",
     "author": "DrLee",
-    "version": 8,
+    "version": 9,
     "source": "https://hahatruyen.com.vn",
+    "icon": "https://hahatruyen.com.vn/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?hahatruyen\\.com\\.vn\\/[^\\s]*",
     "description": "Đọc truyện ngôn tình sắc trên HaHa Truyện",
     "locale": "vi_VN",
