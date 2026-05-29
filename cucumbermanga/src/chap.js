@@ -8,11 +8,11 @@ function execute(url) {
     let seen = {};
 
     doc.select('.reading-content img, .page-break img, .wp-manga-chapter-img').forEach(function(e) {
-        let src = e.attr('src') || e.attr('data-src') || e.attr('data-lazy-src') || '';
+        let src = e.attr('data-src') || e.attr('data-lazy-src') || e.attr('data-original') || e.attr('src') || '';
         src = src.trim();
         if (src.startsWith('//')) src = 'https:' + src;
         if (!src || seen[src]) return;
-        if (!/\.(jpg|jpeg|png|webp|gif)/i.test(src)) return;
+        if (/^data:/.test(src)) return;
         seen[src] = true;
         data.push({ link: src });
     });

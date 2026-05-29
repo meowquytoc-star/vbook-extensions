@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Cucumber Manga",
     "author": "DrLee",
-    "version": 6,
+    "version": 7,
     "source": "https://cucumbermanga.com",
     "icon": "https://cucumbermanga.com/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?cucumbermanga\\.com\\/[^\\s]*",

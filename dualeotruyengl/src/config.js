@@ -1,8 +1,17 @@
 let BASE_URL = 'https://dualeotruyengl.com';
 
 function getDoc(url) {
-    let res = fetch(url);
-    if (res && res.ok) return res.html();
+    url = normalizeUrl(url);
+    try {
+        let res = Http.get(url)
+            .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
+            .header('Referer', BASE_URL + '/')
+            .header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+            .execute();
+        if (res && res.ok) return res.html();
+    } catch(e) {}
+    let res2 = fetch(url);
+    if (res2 && res2.ok) return res2.html();
     return null;
 }
 

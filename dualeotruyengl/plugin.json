@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Dualeotruyen GL",
     "author": "DrLee",
-    "version": 6,
+    "version": 7,
     "source": "https://dualeotruyengl.com",
     "icon": "https://dualeotruyengl.com/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?dualeotruyengl\\.com\\/[^\\s]*",
