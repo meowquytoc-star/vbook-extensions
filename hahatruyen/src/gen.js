@@ -44,17 +44,41 @@ function execute(url, page) {
         if (data.length === 0) return Response.error("No stories found.");
         return Response.success(data, '2');
     }
-    // Pages 2+: AJAX API returns base64-encoded HTML (status 201 = no more pages)
+    // Pages 2+: AJAX API returns base64-encoded HTML
     let catId = extractCatId(url);
     if (!catId) return Response.error("Cannot get category ID.");
     let apiUrl = BASE_URL + '/getwh/ptm/' + catId + '/' + p;
-    let res;
+    let ua = 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36';
+    let res = null;
+
+    // Try GET with XMLHttpRequest header (most common for Vietnamese infinite scroll)
     try {
         res = Http.get(apiUrl)
-            .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
+            .header('User-Agent', ua)
             .header('Referer', url)
+            .header('X-Requested-With', 'XMLHttpRequest')
+            .header('Accept', 'text/html, */*; q=0.01')
             .execute();
-    } catch(e) { res = fetch(apiUrl); }
+    } catch(e) {}
+
+    // Fallback: POST (some sites require POST for AJAX pagination)
+    if (!res || !res.ok) {
+        try {
+            res = Http.post(apiUrl)
+                .header('User-Agent', ua)
+                .header('Referer', url)
+                .header('X-Requested-With', 'XMLHttpRequest')
+                .header('Content-Type', 'application/x-www-form-urlencoded')
+                .body('page=' + p + '&cat=' + catId)
+                .execute();
+        } catch(e) {}
+    }
+
+    // Fallback: plain fetch
+    if (!res || !res.ok) {
+        try { res = fetch(apiUrl); } catch(e) {}
+    }
+
     if (!res || !res.ok) return Response.success([], null);
     let b64 = res.text();
     if (!b64 || b64.length < 10) return Response.success([], null);
