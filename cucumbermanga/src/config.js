@@ -47,7 +47,11 @@ function parseMadaraListing(doc) {
 }
 
 function nextPageUrl(doc) {
-    let next = doc.select('a.next.page-numbers, a[rel=next]').first();
+    let next = doc.select(
+        'a.next.page-numbers, a.page-numbers.next, a[rel=next], ' +
+        '.nav-links a.next, .pagination a.next, nav.navigation a.next, ' +
+        '.wp-pagenavi a.nextpostslink, a.nextpostslink'
+    ).first();
     if (next) return normalizeUrl(next.attr('href') || '');
     return '';
 }

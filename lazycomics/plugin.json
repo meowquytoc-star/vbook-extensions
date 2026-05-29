@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Lazy Comics",
     "author": "DrLee",
-    "version": 8,
+    "version": 9,
     "source": "https://lazycomics.net",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?lazycomics\\.net\\/[^\\s]*",
     "description": "Đọc truyện tranh BL/Yaoi trên Lazy Comics",

@@ -39,9 +39,14 @@ function listPageUrl(base, page) {
 }
 
 function nextPage(doc, currentPage) {
+    // Try explicit "next" navigation link first
+    let next = doc.select('a[rel=next], a.next-page, a.page-next, .pagination a.next, li.next a').first();
+    if (next) return normalizeUrl(next.attr('href') || '');
+
+    // Fallback: find a link with page number = current + 1
     let p = parseInt(currentPage) || 1;
     let found = null;
-    doc.select('.pagination-number a').forEach(function(a) {
+    doc.select('.pagination a, .pagination-number a, .paginattion a, [class*=pagination] a').forEach(function(a) {
         let href = a.attr('href') || '';
         let m = href.match(/[?&]page=(\d+)/);
         if (m && parseInt(m[1]) === p + 1) found = normalizeUrl(href);

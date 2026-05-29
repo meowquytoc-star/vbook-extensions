@@ -7,28 +7,32 @@ function execute(url) {
     let chapters = [];
     let seen = {};
 
-    doc.select('a[href*="truyen-full-chapter"]').forEach(function(e) {
-        let link = normalizeUrl(e.attr('href') || '');
-        if (!link || seen[link]) return;
-        let name = cleanText(e.text() || e.attr('title') || '');
-        if (!name) name = 'Chương';
-        seen[link] = true;
-        chapters.push({ name: name, url: link, host: BASE_URL });
+    // Try multiple chapter URL patterns used by hahatruyen.com.vn
+    ['truyen-full-chapter', 'chapter-', 'chuong-'].forEach(function(pat) {
+        doc.select('a[href*="' + pat + '"]').forEach(function(e) {
+            let link = normalizeUrl(e.attr('href') || '');
+            if (!link || seen[link]) return;
+            if (link.indexOf(BASE_URL) !== 0) return;
+            let name = cleanText(e.text() || e.attr('title') || '');
+            if (!name) name = 'Chương';
+            seen[link] = true;
+            chapters.push({ name: name, url: link, host: BASE_URL });
+        });
     });
 
     // Sort by chapter number ascending
     chapters.sort(function(a, b) {
-        let na = parseInt((a.url.match(/chapter-(\d+)/) || [0, 0])[1]) || 0;
-        let nb = parseInt((b.url.match(/chapter-(\d+)/) || [0, 0])[1]) || 0;
+        let na = parseInt((a.url.match(/(?:chapter|chuong)-(\d+)/i) || [0, 0])[1]) || 0;
+        let nb = parseInt((b.url.match(/(?:chapter|chuong)-(\d+)/i) || [0, 0])[1]) || 0;
         return na - nb;
     });
 
-    // Story URL itself is chapter 1 (no truyen-full-chapter-1 link exists)
-    let storyUrl = normalizeUrl(url);
-    if (!seen[storyUrl]) {
-        chapters.unshift({ name: 'Chương 1', url: storyUrl, host: BASE_URL });
+    // If no chapters found, the story URL itself is the single chapter
+    if (chapters.length === 0) {
+        let storyUrl = normalizeUrl(url);
+        let title = cleanText(doc.select('h1').first() ? doc.select('h1').first().text() : 'Chương 1');
+        chapters.push({ name: title || 'Chương 1', url: storyUrl, host: BASE_URL });
     }
 
-    if (chapters.length === 0) return Response.error("No chapters found.");
     return Response.success(chapters);
 }

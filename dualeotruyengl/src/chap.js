@@ -7,17 +7,42 @@ function execute(url) {
     let data = [];
     let seen = {};
 
-    // Images are stored in JS variables on the page, not in img tags.
-    // Regex-scan the raw HTML for all chapter image URLs.
-    let html = '';
-    try { html = doc.html(); } catch(e) {}
-    let re = /(https?:\/\/[^\s"'<>]*imgdualeo[^\s"'<>]*\/(?:uploads|upbia)\/[^\s"'<>]*\.(?:webp|jpg|jpeg|png|gif))/ig;
-    let m;
-    while ((m = re.exec(html)) !== null) {
-        let src = m[1];
-        if (seen[src]) continue;
+    // Try standard img tags first (reading content area)
+    doc.select('.reading-content img, .page-break img, .chapter-content img, #content img').forEach(function(e) {
+        let src = e.attr('data-src') || e.attr('data-lazy-src') || e.attr('data-original') || e.attr('src') || '';
+        src = src.trim();
+        if (!src || seen[src] || /^data:/.test(src)) return;
+        if (!/\.(webp|jpg|jpeg|png|gif)/i.test(src)) return;
         seen[src] = true;
         data.push({ link: src });
+    });
+
+    // Fallback: regex scan HTML for CDN image URLs
+    if (data.length === 0) {
+        let html = '';
+        try { html = doc.html(); } catch(e) {}
+        let re = /(https?:\/\/[^\s"'<>]+\/(?:uploads|upbia|images|chapter|chap)[^\s"'<>]*\.(?:webp|jpg|jpeg|png|gif)(?:[?#][^\s"'<>]*)?)/ig;
+        let m;
+        while ((m = re.exec(html)) !== null) {
+            let src = m[1];
+            if (seen[src]) continue;
+            seen[src] = true;
+            data.push({ link: src });
+        }
+    }
+
+    // Last resort: any CDN image (imgdualeo or similar)
+    if (data.length === 0) {
+        let html = '';
+        try { html = doc.html(); } catch(e) {}
+        let re2 = /(https?:\/\/[^\s"'<>]*(?:imgdualeo|img\.)[^\s"'<>]*\.(?:webp|jpg|jpeg|png|gif)(?:[?#][^\s"'<>]*)?)/ig;
+        let m2;
+        while ((m2 = re2.exec(html)) !== null) {
+            let src = m2[1];
+            if (seen[src]) continue;
+            seen[src] = true;
+            data.push({ link: src });
+        }
     }
 
     if (data.length === 0) return Response.error("No images found.");

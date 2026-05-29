@@ -49,7 +49,15 @@ function parseListing(doc) {
 }
 
 function nextPageUrl(doc, currentUrl) {
-    let next = doc.select('nav.pagination a[rel=next], .pagination a.next, a.next-page').first();
-    if (next) return normalizeUrl(next.attr('href') || '');
+    let next = doc.select(
+        'a[rel=next], a.next-page, a.page-next, ' +
+        '.pagination a.next, .pagination li.next a, ' +
+        'nav.pagination a[rel=next], [class*=pagination] a.next, ' +
+        '.paginattion a.next, ul.pagination li:last-child a'
+    ).first();
+    if (next) {
+        let href = normalizeUrl(next.attr('href') || '');
+        if (href && href !== currentUrl) return href;
+    }
     return '';
 }
