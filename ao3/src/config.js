@@ -29,6 +29,9 @@ function getDoc(url) {
         let res = Http.get(url)
             .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
             .header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+            .header('Accept-Language', 'en-US,en;q=0.9')
+            .header('Referer', BASE_URL + '/')
+            .header('Cookie', 'accepted_tos=20180523; view_adult=true')
             .execute();
         if (res && res.ok) return res.html();
     } catch(e) {}
@@ -47,7 +50,7 @@ function listPageUrl(base, page) {
 }
 
 function nextPage(doc) {
-    let el = doc.select('a[rel=next], .next a, li.next a').first();
+    let el = doc.select('a[rel=next], .next a, li.next a, .pagination a.next').first();
     return el ? adultUrl(el.attr('href')) : null;
 }
 

@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Lazy Comics",
     "author": "DrLee",
-    "version": 10,
+    "version": 11,
     "source": "https://lazycomics.net",
     "icon": "https://lazycomics.net/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?lazycomics\\.net\\/[^\\s]*",
