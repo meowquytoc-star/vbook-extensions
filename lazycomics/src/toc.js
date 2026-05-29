@@ -9,7 +9,7 @@ function execute(url) {
     let storyBase = normalizeUrl(url).replace(/\/+$/, '');
 
     // Primary: use chapter list container and take ALL links inside it
-    let listEl = doc.select('.list-chapter, #list-chapter, .chapter-list, ul.list_item_chapter, .list_item_chapter, [class*=chapter-list]').first();
+    let listEl = doc.select('.danh-sach-chuong, .list-chapter, #list-chapter, .chapter-list, ul.list_item_chapter, .list_item_chapter, [class*=chapter-list]').first();
     if (listEl) {
         listEl.select('a[href]').forEach(function(e) {
             let link = normalizeUrl(e.attr('href') || '');
