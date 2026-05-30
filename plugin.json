@@ -82,7 +82,7 @@
       "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/sanyteam/plugin.zip",
       "version": 1,
       "source": "https://sanyteam.org",
-      "icon": "https://sanyteam.org/favicon.ico",
+      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/sanyteam/icon.png",
       "description": "Đọc truyện tranh BL/Yaoi trên Sanyteam",
       "type": "comic",
       "locale": "vi_VN",
