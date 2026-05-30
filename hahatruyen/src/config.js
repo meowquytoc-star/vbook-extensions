@@ -21,6 +21,10 @@ function getDoc(url) {
         let res = Http.get(url)
             .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
             .header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+            .header('Accept-Language', 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7')
+            .header('Referer', BASE_URL + '/')
+            .header('Upgrade-Insecure-Requests', '1')
+            .header('Cache-Control', 'max-age=0')
             .execute();
         if (res && res.ok) return res.html();
     } catch(e) {}
