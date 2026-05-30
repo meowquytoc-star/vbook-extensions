@@ -77,6 +77,18 @@
       "tag": "nsfw"
     },
     {
+      "name": "Sanyteam",
+      "author": "DrLee",
+      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/sanyteam/plugin.zip",
+      "version": 1,
+      "source": "https://sanyteam.org",
+      "icon": "https://sanyteam.org/favicon.ico",
+      "description": "Đọc truyện tranh BL/Yaoi trên Sanyteam",
+      "type": "comic",
+      "locale": "vi_VN",
+      "tag": "nsfw"
+    },
+    {
       "name": "07br",
       "author": "Đường đen",
       "path": "https://raw.githubusercontent.com/duongden/vbook/main/Novel_Zh/07br/plugin.zip",
