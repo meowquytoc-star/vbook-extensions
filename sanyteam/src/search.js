@@ -1,11 +1,13 @@
 load('config.js');
 
-function execute(query, page) {
-    let pageUrl = listPageUrl(BASE_URL + '/tim-kiem?q=' + encodeURIComponent(query), page);
-    let doc = getDoc(pageUrl);
+function execute(keyword, page) {
+    if (!keyword) return Response.error("No keyword.");
+    let p = parseInt(page) || 1;
+    let url = BASE_URL + '/tim-kiem?q=' + encodeURIComponent(keyword);
+    let doc = getDoc(listPageUrl(url, p));
     if (!doc) return Response.error("Cannot search.");
+
     let items = parseComicItems(doc);
-    let currentPage = parseInt(page) || 1;
-    let next = nextPage(doc, currentPage);
-    return Response.success(items, next ? String(currentPage + 1) : null);
+    let token = hasNextPage(doc, p) ? String(p + 1) : null;
+    return Response.success(items, token);
 }

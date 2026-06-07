@@ -1,23 +1,36 @@
 load('config.js');
 
+function pickMeta(doc, key) {
+    let el = doc.select('meta[property="' + key + '"], meta[name="' + key + '"]').first();
+    return el ? cleanText(el.attr('content') || '') : '';
+}
+
 function execute(url) {
     let doc = getDoc(url);
     if (!doc) return Response.error("Cannot load story.");
 
-    let name = cleanText(doc.select('h1.posttitle, h1').first()
-        ? doc.select('h1.posttitle, h1').first().text() : '');
+    let titleEl = doc.select('h1.posttitle, h1.entry-title, h1').first();
+    let name = cleanText(titleEl ? titleEl.text() : '');
     if (!name) {
-        let meta = doc.select('meta[property="og:title"]').first();
-        if (meta) name = cleanText(meta.attr('content').split(' - ')[0]);
+        let og = pickMeta(doc, 'og:title');
+        if (og) name = cleanText(og.split(' - ')[0]);
     }
 
-    let cover = '';
-    let og = doc.select('meta[property="og:image"]').first();
-    if (og) cover = og.attr('content') || '';
+    let cover = pickMeta(doc, 'og:image');
+    if (!cover) {
+        let img = doc.select('.posttitle img, article img, .entry-content img').first();
+        if (img) cover = absUrl(imgSrc(img));
+    }
 
     let desc = '';
-    let descEl = doc.select('meta[name="description"]').first();
-    if (descEl) desc = cleanText(descEl.attr('content') || '');
+    let descEl = doc.select('.story-summary, .entry-content p, .desc-text').first();
+    if (descEl) desc = cleanText(descEl.text());
+    if (!desc) desc = pickMeta(doc, 'og:description') || pickMeta(doc, 'description');
 
-    return Response.success({ name: name, cover: cover, description: desc, host: BASE_URL });
+    return Response.success({
+        name: name,
+        cover: cover,
+        description: desc,
+        host: BASE_URL
+    });
 }

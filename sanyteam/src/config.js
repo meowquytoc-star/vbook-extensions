@@ -1,50 +1,61 @@
 let BASE_URL = 'https://sanyteam.org';
-try { if (CONFIG_URL) BASE_URL = CONFIG_URL; } catch(e) {}
+try { if (typeof CONFIG_URL !== 'undefined' && CONFIG_URL) BASE_URL = CONFIG_URL; } catch (e) {}
 
-function cleanText(text) {
-    if (!text) return '';
-    return ('' + text).replace(/\s+/g, ' ').trim();
+const UA = 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36';
+
+function cleanText(s) {
+    if (s === null || s === undefined) return '';
+    return ('' + s).replace(/\s+/g, ' ').trim();
 }
 
-function normalizeUrl(url) {
-    if (!url) return '';
-    url = ('' + url).replace(/&amp;/g, '&').trim();
-    if (url.startsWith('//')) return 'https:' + url;
-    if (url.startsWith('/')) return BASE_URL + url;
-    if (!/^https?:\/\//i.test(url)) return BASE_URL + '/' + url;
-    return url;
+function absUrl(u) {
+    if (!u) return '';
+    u = ('' + u).replace(/&amp;/g, '&').trim();
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('//')) return 'https:' + u;
+    if (u.startsWith('/')) return BASE_URL + u;
+    return BASE_URL + '/' + u;
+}
+
+function imgSrc(el) {
+    if (!el) return '';
+    let s = el.attr('data-src') || el.attr('data-lazy-src') ||
+            el.attr('data-original') || el.attr('src') || '';
+    return s.trim();
 }
 
 function getDoc(url) {
+    url = absUrl(url);
     try {
         let res = Http.get(url)
-            .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
+            .header('User-Agent', UA)
             .header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
             .header('Referer', BASE_URL + '/')
             .execute();
         if (res && res.ok) return res.html();
-    } catch(e) {}
-    let res2 = fetch(url);
-    if (res2 && res2.ok) return res2.html();
+    } catch (e) {}
+    try {
+        let r = fetch(url);
+        if (r && r.ok) return r.html();
+    } catch (e) {}
     return null;
 }
 
 function listPageUrl(base, page) {
-    if (!page || page === '1' || page === 1) return normalizeUrl(base);
-    let p = '' + page;
-    if (/^https?:\/\//i.test(p)) return p;
-    let url = normalizeUrl(base).replace(/[?&]page=\d+/, '');
-    let sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return url + sep + 'page=' + p;
+    let p = parseInt(page) || 1;
+    let url = absUrl(base).replace(/[?&]page=\d+/, '');
+    if (p <= 1) return url;
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'page=' + p;
 }
 
-function nextPage(doc, currentPage) {
+function hasNextPage(doc, currentPage) {
+    let next = doc.select('a[rel=next], .pagination a.next, .pagination-number a.next').first();
+    if (next && next.attr('href')) return true;
     let p = parseInt(currentPage) || 1;
-    let found = null;
-    doc.select('.pagination-number a').forEach(function(a) {
-        let href = a.attr('href') || '';
-        let m = href.match(/[?&]page=(\d+)/);
-        if (m && parseInt(m[1]) === p + 1) found = normalizeUrl(href);
+    let found = false;
+    doc.select('.pagination-number a, .pagination a').forEach(function (a) {
+        let m = (a.attr('href') || '').match(/[?&]page=(\d+)/);
+        if (m && parseInt(m[1]) === p + 1) found = true;
     });
     return found;
 }
@@ -52,17 +63,16 @@ function nextPage(doc, currentPage) {
 function parseComicItems(doc) {
     let items = [];
     let seen = {};
-    doc.select('.comic-item').forEach(function(el) {
-        let linkEl = el.select('.comic-main-link').first();
+    doc.select('.comic-item').forEach(function (el) {
+        let linkEl = el.select('.comic-main-link').first() || el.select('a').first();
         if (!linkEl) return;
-        let link = normalizeUrl(linkEl.attr('href') || '');
+        let link = absUrl(linkEl.attr('href') || '');
         if (!link || seen[link]) return;
         seen[link] = true;
-        let name = cleanText(el.select('.comic-title').first() ? el.select('.comic-title').first().text() : '');
-        if (!name) name = cleanText(linkEl.attr('title') || '');
+        let titleEl = el.select('.comic-title').first();
+        let name = cleanText(titleEl ? titleEl.text() : (linkEl.attr('title') || linkEl.text()));
         if (!name) return;
-        let imgEl = el.select('.comic-cover img').first();
-        let cover = imgEl ? normalizeUrl(imgEl.attr('src') || '') : '';
+        let cover = absUrl(imgSrc(el.select('.comic-cover img, img').first()));
         items.push({ name: name, link: link, cover: cover, description: '', host: BASE_URL });
     });
     return items;

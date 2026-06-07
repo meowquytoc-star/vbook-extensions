@@ -1,80 +1,93 @@
 let BASE_URL = 'https://lazycomics.net';
-try { if (CONFIG_URL) BASE_URL = CONFIG_URL; } catch(e) {}
+try { if (typeof CONFIG_URL !== 'undefined' && CONFIG_URL) BASE_URL = CONFIG_URL; } catch (e) {}
 
-function cleanText(text) {
-    if (!text) return '';
-    return ('' + text).replace(/\s+/g, ' ').trim();
+const UA = 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36';
+
+function cleanText(s) {
+    if (s === null || s === undefined) return '';
+    return ('' + s).replace(/\s+/g, ' ').trim();
 }
 
-function normalizeUrl(url) {
-    if (!url) return '';
-    url = ('' + url).replace(/&amp;/g, '&').trim();
-    if (url.startsWith('//')) return 'https:' + url;
-    if (url.startsWith('/')) return BASE_URL + url;
-    if (!/^https?:\/\//i.test(url)) return BASE_URL + '/' + url;
-    return url;
+function absUrl(u) {
+    if (!u) return '';
+    u = ('' + u).replace(/&amp;/g, '&').trim();
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('//')) return 'https:' + u;
+    if (u.startsWith('/')) return BASE_URL + u;
+    return BASE_URL + '/' + u;
+}
+
+function coverUrl(u) {
+    if (!u) return '';
+    u = ('' + u).trim();
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('//')) return 'https:' + u;
+    if (u.startsWith('/storage/')) return BASE_URL + u;
+    if (u.startsWith('/')) return BASE_URL + u;
+    return BASE_URL + '/storage/' + u;
+}
+
+function imgSrc(el) {
+    if (!el) return '';
+    return el.attr('data-src') || el.attr('data-lazy-src') ||
+           el.attr('data-original') || el.attr('src') || '';
 }
 
 function getDoc(url) {
-    url = normalizeUrl(url);
+    url = absUrl(url);
     try {
         let res = Http.get(url)
-            .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
+            .header('User-Agent', UA)
             .header('Referer', BASE_URL + '/')
             .header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
             .execute();
         if (res && res.ok) return res.html();
-    } catch(e) {}
-    let res2 = fetch(url);
-    if (res2 && res2.ok) return res2.html();
+    } catch (e) {}
+    try {
+        let r = fetch(url);
+        if (r && r.ok) return r.html();
+    } catch (e) {}
     return null;
 }
 
-function listPageUrl(base, page) {
-    if (!page || page === '1' || page === 1) return normalizeUrl(base);
-    let p = '' + page;
-    if (/^https?:\/\//i.test(p)) return p;
-    let url = normalizeUrl(base).replace(/\?page=\d+/, '').replace(/\/+$/, '');
-    return url + '?page=' + p;
+function pageUrl(base, page) {
+    let p = parseInt(page) || 1;
+    let u = absUrl(base).replace(/[?&]page=\d+/, '').replace(/\/+$/, '');
+    if (p <= 1) return u;
+    return u + (u.indexOf('?') > -1 ? '&' : '?') + 'page=' + p;
 }
 
-function nextPage(doc, currentPage) {
-    // Try explicit "next" navigation link first
+function hasNextPage(doc, currentPage) {
     let next = doc.select('a[rel=next], a.next-page, a.page-next, .pagination a.next, li.next a').first();
-    if (next) return normalizeUrl(next.attr('href') || '');
-
-    // Fallback: find a link with page number = current + 1
+    if (next && next.attr('href')) return true;
     let p = parseInt(currentPage) || 1;
-    let found = null;
-    doc.select('.pagination a, .pagination-number a, .paginattion a, [class*=pagination] a').forEach(function(a) {
-        let href = a.attr('href') || '';
-        let m = href.match(/[?&]page=(\d+)/);
-        if (m && parseInt(m[1]) === p + 1) found = normalizeUrl(href);
+    let found = false;
+    doc.select('.pagination a, [class*=pagination] a').forEach(function (a) {
+        let m = (a.attr('href') || '').match(/[?&]page=(\d+)/);
+        if (m && parseInt(m[1]) === p + 1) found = true;
     });
     return found;
 }
 
-function coverUrl(path) {
-    if (!path) return '';
-    if (/^https?:\/\//i.test(path)) return path;
-    if (path.startsWith('/storage/')) return BASE_URL + path;
-    return BASE_URL + '/storage/' + path;
-}
-
-function parseComicItems(doc) {
+function parseStoryList(doc) {
     let data = [];
     let seen = {};
-    doc.select('.comic-item').forEach(function(item) {
-        let a = item.select('a').first();
+    let sel = '.comic-item, .manga-item, .story-item, [class*=comic-item], [class*=manga-item]';
+    let items = doc.select(sel);
+    if (!items || items.size() === 0) {
+        items = doc.select('article, .item').filter(function (el) {
+            return el.select('a[href*="/truyen/"]').size() > 0;
+        });
+    }
+    items.forEach(function (item) {
+        let a = item.select('a[href*="/truyen/"]').first() || item.select('a').first();
         if (!a) return;
-        let link = normalizeUrl(a.attr('href') || '');
+        let link = absUrl(a.attr('href') || '');
         if (!link || seen[link]) return;
         seen[link] = true;
-        let name = cleanText(item.select('.comic-title, h3').first()
-            ? item.select('.comic-title, h3').first().text() : a.attr('title') || '');
-        let img = item.select('img').first();
-        let cover = '';
-        if (img) cover = coverUrl(img.attr('src') || img.attr('data-src') || '');
+        let titleEl = item.select('.comic-title, .manga-title, h3, h4, .title').first();
+        let name = cleanText(titleEl ? titleEl.text() : (a.attr('title') || a.text()));
+        let cover = coverUrl(imgSrc(item.select('img').first()));
         data.push({ name: name, link: link, cover: cover, description: '', host: BASE_URL });
     });
     return data;

@@ -8,6 +8,7 @@ function execute() {
         { title: "Người Lớn (18+)", input: "https://lazycomics.net/the-loai/nguoi-lon",  script: 'gen.js' },
         { title: "ABO",             input: "https://lazycomics.net/the-loai/abo",        script: 'gen.js' },
         { title: "Manhwa",          input: "https://lazycomics.net/the-loai/manhwa",     script: 'gen.js' },
+        { title: "Manga",           input: "https://lazycomics.net/the-loai/manga",      script: 'gen.js' },
         { title: "Webtoon",         input: "https://lazycomics.net/the-loai/webtoon",    script: 'gen.js' }
     ]);
 }

@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Sanyteam",
     "author": "DrLee",
-    "version": 1,
+    "version": 2,
     "source": "https://sanyteam.org",
     "icon": "https://sanyteam.org/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?sanyteam\\.org\\/[^\\s]*",
