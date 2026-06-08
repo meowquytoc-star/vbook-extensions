@@ -81,6 +81,42 @@ function nextPageUrl(doc) {
     return next ? absUrl(next.attr('href') || '') : '';
 }
 
+// ── MADARA LOAD-MORE AJAX (bypass anti-bot block /page/N/) ──────────
+// cucumbermanga chặn /page/N/ → 403. Phải gọi POST admin-ajax.php
+// action=madara_load_more với template madara-core/content/content-archive.
+// Trả về Document (đã parse HTML) hoặc null nếu fail.
+function fetchMadaraLoadMore(orderby, page) {
+    // page: page index như Madara hiểu (page=1 trả ra trang thứ 2 thực tế)
+    // orderby: latest | trending | views | alphabet | new-manga | rating
+    let ord = orderby || 'latest';
+    try {
+        let res = Http.post(BASE_URL + '/wp-admin/admin-ajax.php')
+            .header('User-Agent', UA)
+            .header('X-Requested-With', 'XMLHttpRequest')
+            .header('Referer', BASE_URL + '/manga-2/')
+            .header('Content-Type', 'application/x-www-form-urlencoded')
+            .body(
+                'action=madara_load_more' +
+                '&page=' + encodeURIComponent(page) +
+                '&template=madara-core%2Fcontent%2Fcontent-archive' +
+                '&vars%5Borderby%5D=' + encodeURIComponent(ord) +
+                '&vars%5Bposts_per_page%5D=20' +
+                '&vars%5Bpost_type%5D=wp-manga' +
+                '&vars%5Bmeta_query%5D%5Brelation%5D=AND'
+            )
+            .execute();
+        if (res && res.ok) return res.html();
+    } catch (e) {}
+    return null;
+}
+
+// Trích orderby từ URL của home.js (?m_orderby=latest → "latest")
+function orderbyFromUrl(url) {
+    let m = ('' + url).match(/[?&]m_orderby=([^&]+)/);
+    if (m) return decodeURIComponent(m[1]);
+    return 'latest';
+}
+
 function execute() {
     return Response.success({ ok: true });
 }
