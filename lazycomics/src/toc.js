@@ -147,23 +147,30 @@ function execute(url) {
     if (listEl) parseChapterAnchors(listEl, chapters, seen, storyBase, false);
     if (chapters.length === 0) parseChapterAnchors(doc, chapters, seen, storyBase, true);
 
-    // BƯỚC 2: paginate AJAX nếu phát hiện slug + đã có >= 20 chap
+    // BƯỚC 2: paginate AJAX. LUÔN thử khi có slug — kể cả static trả ít hơn 20 chap
+    // (vì có thể manga ngắn hoặc theme khác trả batch khác). Server tự dừng qua has_more.
     let slug = extractSlug(doc, url);
-    if (slug && chapters.length >= PAGE_SIZE) {
-        // Offset: số chap server đã trả + chap đầu tiên (cứng = 20 batch). Cứ tăng theo PAGE_SIZE thay vì chapters.length để chắc chắn step đúng.
-        let offset = PAGE_SIZE;
+    if (slug && chapters.length > 0) {
+        // Offset = chapters đã load (server hiểu "skip N chap đầu, trả về 20 chap tiếp")
+        let offset = chapters.length;
         for (let i = 0; i < MAX_PAGES; i++) {
             let obj = fetchLoadMore(slug, offset);
             if (!obj) break;
             let html = obj.html || '';
-            if (!html) break;
+            if (!html) {
+                if (obj.has_more === false) break;
+                continue;
+            }
 
             let before = chapters.length;
             extractChaptersFromHtml(html, storyBase, chapters, seen);
-            // Không thêm được chap mới → dừng (tránh loop)
-            if (chapters.length === before) break;
+            let added = chapters.length - before;
+            // Không thêm được chap mới → dừng (tránh loop vô tận)
+            if (added === 0) break;
 
-            offset += PAGE_SIZE;
+            // Offset bước theo số chap server thực sự thêm vào (deterministic + an toàn
+            // khi response trả < 20 vì duplicate/hidden chap)
+            offset += added;
             if (obj.has_more === false || obj.has_more === undefined) break;
         }
     }
