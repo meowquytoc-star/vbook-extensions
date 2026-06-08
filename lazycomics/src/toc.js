@@ -161,37 +161,73 @@ function execute(url) {
     if (listEl) parseChapterAnchors(listEl, chapters, seen, storyBase, false);
     if (chapters.length === 0) parseChapterAnchors(doc, chapters, seen, storyBase, true);
 
-    // BƯỚC 2: paginate AJAX. LUÔN thử khi có slug — kể cả static trả ít hơn 20 chap
-    // (vì có thể manga ngắn hoặc theme khác trả batch khác). Server tự dừng qua has_more.
+    // BƯỚC 2: paginate AJAX. LUÔN thử khi có slug.
     let slug = extractSlug(doc, url);
+    let debugTrace = 'slug=' + (slug || '∅') + ' static=' + chapters.length;
+
     if (slug && chapters.length > 0) {
-        // Offset = chapters đã load (server hiểu "skip N chap đầu, trả về 20 chap tiếp")
         let offset = chapters.length;
+        let iters = 0;
+        let lastErr = '';
         for (let i = 0; i < MAX_PAGES; i++) {
-            let obj = fetchLoadMore(slug, offset);
-            if (!obj) break;
+            iters = i + 1;
+            let url2 = BASE_URL + '/load-more-chapters?slug=' + encodeURIComponent(slug)
+                     + '&offset=' + offset + '&sortByPosition=desc';
+            let res = null;
+            try {
+                res = Http.get(url2)
+                    .header('User-Agent', UA)
+                    .header('Referer', BASE_URL + '/truyen/' + slug)
+                    .header('X-Requested-With', 'XMLHttpRequest')
+                    .header('Accept', 'application/json, text/plain, */*')
+                    .execute();
+            } catch (e) { lastErr = 'http_exc:' + (e && e.message ? e.message : '?'); break; }
+
+            if (!res) { lastErr = 'res_null'; break; }
+            if (!res.ok) { lastErr = 'not_ok:' + (res.status || '?'); break; }
+
+            let txt = '';
+            try { txt = res.text(); } catch (e) { lastErr = 'text_exc'; break; }
+            if (!txt) { lastErr = 'empty_text'; break; }
+
+            let obj = null;
+            try { obj = JSON.parse(txt); } catch (e) {
+                // Fallback regex
+                let mh = txt.match(/"html"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+                let mhm = txt.match(/"has_more"\s*:\s*(true|false)/);
+                if (mh) {
+                    obj = { html: unescapeJsonText(mh[1]), has_more: (mhm ? mhm[1] === 'true' : false) };
+                } else {
+                    lastErr = 'parse_fail txt0=' + txt.substring(0, 40);
+                    break;
+                }
+            }
+            if (!obj) { lastErr = 'obj_null'; break; }
+
             let html = obj.html || '';
             if (!html) {
-                if (obj.has_more === false) break;
+                if (obj.has_more === false || obj.has_more === undefined) { lastErr = 'empty_html_no_more'; break; }
                 continue;
             }
 
             let before = chapters.length;
             extractChaptersFromHtml(html, storyBase, chapters, seen);
             let added = chapters.length - before;
-            // Không thêm được chap mới → dừng (tránh loop vô tận)
-            if (added === 0) break;
+            if (added === 0) { lastErr = 'added_0 htmlSize=' + html.length; break; }
 
-            // Offset bước theo số chap server thực sự thêm vào (deterministic + an toàn
-            // khi response trả < 20 vì duplicate/hidden chap)
             offset += added;
-            if (obj.has_more === false || obj.has_more === undefined) break;
+            if (obj.has_more !== true) { lastErr = 'has_more_false'; break; }
         }
+        debugTrace += ' iters=' + iters + ' err=' + lastErr + ' total=' + chapters.length;
     }
 
     // Chapters đang desc (mới → cũ). Reverse → asc cho VBook.
     chapters.reverse();
 
     if (chapters.length === 0) return Response.error("No chapters found.");
+
+    // Inject 1 chapter "DEBUG" để xem trace trong UI VBook (nếu user thấy nó nghĩa là code đang chạy)
+    chapters.push({ name: '⚙️ DEBUG: ' + debugTrace, url: 'about:blank', host: BASE_URL });
+
     return Response.success(chapters);
 }
