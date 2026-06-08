@@ -1,6 +1,7 @@
 load('config.js');
 
-const IMG_SELECTORS = 'img.manga-image, .reading-content img, .chapter-content img, .reader img';
+// teamsany.com: ảnh chương nằm trong .reader-area
+const IMG_SELECTORS = '.reader-area img, img.manga-image, .reading-content img, .chapter-content img, .reader img';
 const VALID_EXT = /\.(webp|jpg|jpeg|png|gif|avif)(?:[?#]|$)/i;
 
 function pushImg(arr, seen, src, referer) {

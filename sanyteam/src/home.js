@@ -1,10 +1,11 @@
 function execute() {
     return Response.success([
-        { title: "Mới Cập Nhật",   input: "https://sanyteam.org/truyen-moi-cap-nhat", script: 'gen.js' },
-        { title: "Đã Hoàn Thành",  input: "https://sanyteam.org/truyen-da-hoan",      script: 'gen.js' },
-        { title: "BoyLove / BL",   input: "https://sanyteam.org/the-loai/boylove",    script: 'gen.js' },
-        { title: "Yaoi",           input: "https://sanyteam.org/the-loai/yaoi",       script: 'gen.js' },
-        { title: "Manhwa",         input: "https://sanyteam.org/the-loai/manhwa",     script: 'gen.js' },
-        { title: "18+",            input: "https://sanyteam.org/the-loai/18",         script: 'gen.js' }
+        { title: "Manhwa (Mới cập nhật)", input: "https://teamsany.com/manhwa/",           script: 'gen.js' },
+        { title: "BoyLove / BL",          input: "https://teamsany.com/genre/boylove/",    script: 'gen.js' },
+        { title: "Yaoi",                  input: "https://teamsany.com/genre/yaoi/",       script: 'gen.js' },
+        { title: "Omegaverse",            input: "https://teamsany.com/genre/omegaverse/", script: 'gen.js' },
+        { title: "Romance",               input: "https://teamsany.com/genre/romance/",    script: 'gen.js' },
+        { title: "Comedy",                input: "https://teamsany.com/genre/comedy/",     script: 'gen.js' },
+        { title: "Sany Team",             input: "https://teamsany.com/genre/sany-team/",  script: 'gen.js' }
     ]);
 }

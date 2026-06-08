@@ -7,10 +7,14 @@ function execute(url) {
     let chapters = [];
     let seen = {};
 
-    doc.select('a.chapter-item, .chapter-list a, .list-chapter a').forEach(function (el) {
+    // teamsany.com (domain mới): chapter trong #chapter_list, mỗi item là <span class="eps"><a>
+    // Selectors cũ giữ làm fallback cho structure cũ
+    doc.select('#chapter_list a, .eps a, a.chapter-item, .chapter-list a, .list-chapter a').forEach(function (el) {
         let link = absUrl(el.attr('href') || '').replace(/[?#].*$/, '');
         if (!link || seen[link]) return;
         if (link.indexOf(BASE_URL) !== 0) return;
+        // Chỉ giữ link là chapter (có pattern -chap-N)
+        if (!/-chap-\d/i.test(link)) return;
         seen[link] = true;
         let noEl = el.select('.chapter-no').first();
         let name = noEl ? ('Chương ' + cleanText(noEl.text())) : cleanText(el.text() || el.attr('title') || '');
