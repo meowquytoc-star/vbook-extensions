@@ -57,24 +57,43 @@ function parseChapterAnchors(scope, chapters, seen, storyBase, requirePattern) {
     });
 }
 
-// Lấy raw text response (thử nhiều API khác nhau của VBook Http)
+// Lấy raw text từ Http response. VBook các phiên bản API khác nhau.
 function readBody(res) {
     if (!res) return '';
     let t = '';
     try { t = res.body(); } catch (e) {}
     if (!t) { try { t = res.text(); } catch (e) {} }
     if (!t) { try { t = res.string(); } catch (e) {} }
+    if (!t) {
+        try {
+            let d = res.html();
+            if (d) {
+                try { t = d.html(); } catch (e) {}
+                if (!t) try { t = d.text(); } catch (e) {}
+                if (!t) try { t = d.toString(); } catch (e) {}
+            }
+        } catch (e) {}
+    }
     if (!t) { try { t = res.toString(); } catch (e) {} }
     return t || '';
 }
 
-// Trích chapter <a href + name> từ string HTML (response body)
-// Không cần parse HTML — dùng regex.
+// Unescape JSON string nội bộ: \" → ", \/ → /, \\ → \, \n → newline, \t → tab
+function unescapeJsonText(s) {
+    if (!s) return '';
+    return s.replace(/\\\//g, '/')
+            .replace(/\\"/g, '"')
+            .replace(/\\n/g, '\n')
+            .replace(/\\r/g, '')
+            .replace(/\\t/g, ' ');
+}
+
+// Trích chapter <a class="chapter-item" href + <h3>title</h3>> từ HTML string
 function extractChaptersFromHtml(htmlStr, storyBase, chapters, seen) {
     if (!htmlStr) return 0;
     let added = 0;
 
-    // Pattern: <a ... href="LINK" ... > ... <h3>TITLE</h3> ... </a>
+    // Pattern bắt <a ... href="..." ... > ... </a>
     let aRe = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
     let m;
     while ((m = aRe.exec(htmlStr)) !== null) {
@@ -106,6 +125,9 @@ function extractChaptersFromHtml(htmlStr, storyBase, chapters, seen) {
     return added;
 }
 
+// Trả về object { html: <unescaped html str>, has_more: bool|null }
+// Không tin tưởng JSON.parse — dùng regex để extract field ra khỏi response.
+// Cách này robust với mọi JS engine, kể cả khi VBook không có JSON.parse chuẩn.
 function fetchLoadMore(slug, offset) {
     let url = BASE_URL + '/load-more-chapters?slug=' + encodeURIComponent(slug)
             + '&offset=' + offset + '&sortByPosition=desc';
@@ -119,16 +141,25 @@ function fetchLoadMore(slug, offset) {
         if (!res || !res.ok) return null;
         let txt = readBody(res);
         if (!txt) return null;
-        // Parse JSON {html, has_more}
-        let obj = null;
-        try { obj = JSON.parse(txt); } catch (e) {
-            // Một số response có thể bị prefix junk → cố trim
-            let i = txt.indexOf('{');
-            if (i >= 0) {
-                try { obj = JSON.parse(txt.substring(i)); } catch (e2) {}
-            }
+
+        // 1. Extract field "html" — dùng regex thay vì JSON.parse
+        let htmlField = '';
+        // Tìm "html":"..."  với chấp nhận escape \" bên trong
+        let mh = txt.match(/"html"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (mh) {
+            htmlField = unescapeJsonText(mh[1]);
+        } else {
+            // Fallback: nếu JSON đã được auto-unescape bởi readBody (qua doc.html()),
+            // dùng nguyên txt như HTML.
+            htmlField = txt;
         }
-        return obj;
+
+        // 2. Extract has_more flag
+        let hasMore = null;
+        let mhm = txt.match(/"has_more"\s*:\s*(true|false)/);
+        if (mhm) hasMore = (mhm[1] === 'true');
+
+        return { html: htmlField, has_more: hasMore };
     } catch (e) {
         return null;
     }
