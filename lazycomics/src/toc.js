@@ -1,8 +1,11 @@
 load('config.js');
 
-// Lazy Comics dùng pagination AJAX /load-more-chapters
-// Mỗi response trả JSON {html, has_more} (20 chap/lần)
-// Vòng lặp offset 20, 40, 60... cho tới has_more === false.
+// Lazy Comics: pagination AJAX /load-more-chapters
+//   Trả JSON {"html": "<a class=...>...</a>", "has_more": bool}
+// Mỗi batch 20 chap.
+//
+// Tránh phụ thuộc vào Jsoup.parse() trên VBook JS engine — dùng regex trực tiếp
+// trên text của JSON để extract URL + tên chương.
 
 const CHAP_PATTERNS = ['/chap-', '/chapter-', '/tap-', '/chuong-'];
 const LIST_SELECTORS = [
@@ -13,7 +16,7 @@ const LIST_SELECTORS = [
 ].join(', ');
 
 const PAGE_SIZE = 20;
-const MAX_PAGES = 200;  // an toàn: cap 4000 chap
+const MAX_PAGES = 200;  // cap 4000 chap, an toàn
 
 function isChapterLink(link, storyBase) {
     if (!link || link.indexOf(BASE_URL) !== 0) return false;
@@ -25,15 +28,14 @@ function isChapterLink(link, storyBase) {
 }
 
 function extractSlug(doc, url) {
-    // 1. Try data-slug attribute (#chapter-list-render data-slug="bat-quy-tac")
+    // Try data-slug từ #chapter-list-render
     let render = doc.select('#chapter-list-render').first();
     if (render) {
         let s = render.attr('data-slug');
         if (s) return s;
     }
-    // 2. Fallback: extract from URL /truyen/{slug}
-    let u = absUrl(url);
-    let m = u.match(/\/truyen\/([^\/?#]+)/);
+    // Fallback: lấy từ URL /truyen/{slug}
+    let m = absUrl(url).match(/\/truyen\/([^\/?#]+)/);
     if (m) return m[1];
     return '';
 }
@@ -46,7 +48,6 @@ function parseChapterAnchors(scope, chapters, seen, storyBase, requirePattern) {
         if (link === storyBase || link === storyBase + '/') return;
         if (requirePattern && !isChapterLink(link, storyBase)) return;
         seen[link] = true;
-        // Tên chapter: ưu tiên <h3> trong link (cấu trúc Lazy Comics)
         let title = '';
         let h3 = e.select('h3').first();
         if (h3) title = cleanText(h3.text());
@@ -56,8 +57,56 @@ function parseChapterAnchors(scope, chapters, seen, storyBase, requirePattern) {
     });
 }
 
+// Lấy raw text response (thử nhiều API khác nhau của VBook Http)
+function readBody(res) {
+    if (!res) return '';
+    let t = '';
+    try { t = res.body(); } catch (e) {}
+    if (!t) { try { t = res.text(); } catch (e) {} }
+    if (!t) { try { t = res.string(); } catch (e) {} }
+    if (!t) { try { t = res.toString(); } catch (e) {} }
+    return t || '';
+}
+
+// Trích chapter <a href + name> từ string HTML (response body)
+// Không cần parse HTML — dùng regex.
+function extractChaptersFromHtml(htmlStr, storyBase, chapters, seen) {
+    if (!htmlStr) return 0;
+    let added = 0;
+
+    // Pattern: <a ... href="LINK" ... > ... <h3>TITLE</h3> ... </a>
+    let aRe = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+    let m;
+    while ((m = aRe.exec(htmlStr)) !== null) {
+        let link = m[1];
+        let innerHtml = m[2];
+
+        link = link.replace(/&amp;/g, '&').replace(/[?#].*$/, '');
+        if (!link) continue;
+        if (link.indexOf('http') !== 0) link = absUrl(link);
+        if (link.indexOf(BASE_URL) !== 0) continue;
+        if (link === storyBase || link === storyBase + '/') continue;
+        if (seen[link]) continue;
+
+        // Tên: ưu tiên <h3>...</h3>
+        let title = '';
+        let h3m = innerHtml.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
+        if (h3m) {
+            title = h3m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        }
+        if (!title) {
+            title = innerHtml.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        }
+        if (!title) title = 'Chapter';
+
+        seen[link] = true;
+        chapters.push({ name: title, url: link, host: BASE_URL });
+        added++;
+    }
+    return added;
+}
+
 function fetchLoadMore(slug, offset) {
-    // GET /load-more-chapters?slug=X&offset=N&sortByPosition=desc
     let url = BASE_URL + '/load-more-chapters?slug=' + encodeURIComponent(slug)
             + '&offset=' + offset + '&sortByPosition=desc';
     try {
@@ -68,13 +117,18 @@ function fetchLoadMore(slug, offset) {
             .header('Accept', 'application/json, text/javascript, */*; q=0.01')
             .execute();
         if (!res || !res.ok) return null;
-        // Đọc body dạng text rồi JSON.parse
-        let txt = '';
-        try { txt = res.body(); } catch (e) {}
-        if (!txt) { try { txt = res.text(); } catch (e) {} }
-        if (!txt) { try { txt = res.string(); } catch (e) {} }
+        let txt = readBody(res);
         if (!txt) return null;
-        return JSON.parse(txt);
+        // Parse JSON {html, has_more}
+        let obj = null;
+        try { obj = JSON.parse(txt); } catch (e) {
+            // Một số response có thể bị prefix junk → cố trim
+            let i = txt.indexOf('{');
+            if (i >= 0) {
+                try { obj = JSON.parse(txt.substring(i)); } catch (e2) {}
+            }
+        }
+        return obj;
     } catch (e) {
         return null;
     }
@@ -88,38 +142,33 @@ function execute(url) {
     let seen = {};
     let storyBase = absUrl(url).replace(/\/+$/, '');
 
-    // BƯỚC 1: lấy 20 chap đầu từ static HTML
+    // BƯỚC 1: lấy 20 chap đầu từ HTML tĩnh
     let listEl = doc.select(LIST_SELECTORS).first();
     if (listEl) parseChapterAnchors(listEl, chapters, seen, storyBase, false);
     if (chapters.length === 0) parseChapterAnchors(doc, chapters, seen, storyBase, true);
 
-    // BƯỚC 2: paginate /load-more-chapters nếu phát hiện slug + đã có >= 20 chap
+    // BƯỚC 2: paginate AJAX nếu phát hiện slug + đã có >= 20 chap
     let slug = extractSlug(doc, url);
     if (slug && chapters.length >= PAGE_SIZE) {
-        let offset = chapters.length;
+        // Offset: số chap server đã trả + chap đầu tiên (cứng = 20 batch). Cứ tăng theo PAGE_SIZE thay vì chapters.length để chắc chắn step đúng.
+        let offset = PAGE_SIZE;
         for (let i = 0; i < MAX_PAGES; i++) {
             let obj = fetchLoadMore(slug, offset);
-            if (!obj || !obj.html) break;
-
-            // Parse HTML chunk
-            let chunkDoc = null;
-            try { chunkDoc = Jsoup.parse(obj.html); } catch (e) {}
-            if (!chunkDoc) {
-                try { chunkDoc = Http.get('data:text/html,' + encodeURIComponent(obj.html)).execute().html(); } catch (e) {}
-            }
-            if (!chunkDoc) break;
+            if (!obj) break;
+            let html = obj.html || '';
+            if (!html) break;
 
             let before = chapters.length;
-            parseChapterAnchors(chunkDoc, chapters, seen, storyBase, false);
-            // Không thêm chap nào → dừng (tránh loop vô tận)
+            extractChaptersFromHtml(html, storyBase, chapters, seen);
+            // Không thêm được chap mới → dừng (tránh loop)
             if (chapters.length === before) break;
 
-            offset = chapters.length;
+            offset += PAGE_SIZE;
             if (obj.has_more === false || obj.has_more === undefined) break;
         }
     }
 
-    // BƯỚC 3: chapter đang desc (mới → cũ). Reverse → asc cho VBook.
+    // Chapters đang desc (mới → cũ). Reverse → asc cho VBook.
     chapters.reverse();
 
     if (chapters.length === 0) return Response.error("No chapters found.");
