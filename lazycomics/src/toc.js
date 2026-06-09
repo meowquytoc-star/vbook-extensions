@@ -169,30 +169,73 @@ function execute(url) {
         let offset = chapters.length;
         let iters = 0;
         let lastErr = '';
+        let method = '';
         for (let i = 0; i < MAX_PAGES; i++) {
             iters = i + 1;
             let url2 = BASE_URL + '/load-more-chapters?slug=' + encodeURIComponent(slug)
                      + '&offset=' + offset + '&sortByPosition=desc';
+
+            // Multi-strategy HTTP — VBook iOS không có chain .header()
             let res = null;
-            try {
-                res = Http.get(url2)
-                    .header('User-Agent', UA)
-                    .header('Referer', BASE_URL + '/truyen/' + slug)
-                    .header('X-Requested-With', 'XMLHttpRequest')
-                    .header('Accept', 'application/json, text/plain, */*')
-                    .execute();
-            } catch (e) { lastErr = 'http_exc:' + (e && e.message ? e.message : '?'); break; }
 
-            if (!res) { lastErr = 'res_null'; break; }
-            if (!res.ok) { lastErr = 'not_ok:' + (res.status || '?'); break; }
+            // Strategy A: fetch(url, options) — iOS phổ biến
+            if (!res) {
+                try {
+                    res = fetch(url2, {
+                        headers: {
+                            'User-Agent': UA,
+                            'Referer': BASE_URL + '/truyen/' + slug,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json, text/plain, */*'
+                        }
+                    });
+                    if (res) method = 'fetch+opts';
+                } catch (e) {}
+            }
+            // Strategy B: fetch(url) — không có header
+            if (!res) {
+                try { res = fetch(url2); if (res) method = 'fetch_bare'; } catch (e) {}
+            }
+            // Strategy C: Http.get(url, options) — alt API
+            if (!res) {
+                try {
+                    res = Http.get(url2, {
+                        'User-Agent': UA,
+                        'Referer': BASE_URL + '/truyen/' + slug,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    });
+                    if (res) method = 'http_opts';
+                } catch (e) {}
+            }
+            // Strategy D: Http.get(url) bare
+            if (!res) {
+                try { res = Http.get(url2); if (res) method = 'http_bare'; } catch (e) {}
+            }
+            // Strategy E: builder chain (Android)
+            if (!res) {
+                try {
+                    res = Http.get(url2)
+                        .header('User-Agent', UA)
+                        .header('Referer', BASE_URL + '/truyen/' + slug)
+                        .header('X-Requested-With', 'XMLHttpRequest')
+                        .execute();
+                    if (res) method = 'http_chain';
+                } catch (e) { lastErr = 'all_http_exc:' + (e && e.message ? e.message : '?').substring(0, 60); }
+            }
 
+            if (!res) { lastErr = lastErr || 'all_methods_null'; break; }
+
+            // Đọc body — thử nhiều API
             let txt = '';
-            try { txt = res.text(); } catch (e) { lastErr = 'text_exc'; break; }
-            if (!txt) { lastErr = 'empty_text'; break; }
+            try { txt = res.text(); } catch (e) {}
+            if (!txt) try { txt = res.body; } catch (e) {}
+            if (!txt) try { txt = res.body(); } catch (e) {}
+            if (!txt) try { txt = res.string(); } catch (e) {}
+            if (!txt) try { let d = res.html(); if (d) txt = d.html() || d.text() || ''; } catch (e) {}
+            if (!txt) { lastErr = 'empty_text (method=' + method + ')'; break; }
 
             let obj = null;
             try { obj = JSON.parse(txt); } catch (e) {
-                // Fallback regex
                 let mh = txt.match(/"html"\s*:\s*"((?:[^"\\]|\\.)*)"/);
                 let mhm = txt.match(/"has_more"\s*:\s*(true|false)/);
                 if (mh) {
@@ -218,7 +261,7 @@ function execute(url) {
             offset += added;
             if (obj.has_more !== true) { lastErr = 'has_more_false'; break; }
         }
-        debugTrace += ' iters=' + iters + ' err=' + lastErr + ' total=' + chapters.length;
+        debugTrace += ' iters=' + iters + ' method=' + method + ' err=' + lastErr + ' total=' + chapters.length;
     }
 
     // Chapters đang desc (mới → cũ). Reverse → asc cho VBook.
