@@ -268,9 +268,5 @@ function execute(url) {
     chapters.reverse();
 
     if (chapters.length === 0) return Response.error("No chapters found.");
-
-    // Inject 1 chapter "DEBUG" để xem trace trong UI VBook (nếu user thấy nó nghĩa là code đang chạy)
-    chapters.push({ name: '⚙️ DEBUG: ' + debugTrace, url: 'about:blank', host: BASE_URL });
-
     return Response.success(chapters);
 }
