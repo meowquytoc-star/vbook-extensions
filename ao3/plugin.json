@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Archive of Our Own",
     "author": "DrLee",
-    "version": 8,
+    "version": 9,
     "source": "https://archiveofourown.org",
     "icon": "https://archiveofourown.org/favicon.ico",
     "regexp": "https?:\\/\\/(?:[^\\/]+\\.)?archiveofourown\\.org\\/[^\\s]*",

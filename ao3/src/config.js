@@ -25,19 +25,39 @@ function adultUrl(url) {
 
 function getDoc(url) {
     url = adultUrl(url);
-    try {
-        let res = Http.get(url)
-            .header('User-Agent', 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36')
-            .header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
-            .header('Accept-Language', 'en-US,en;q=0.9')
-            .header('Referer', BASE_URL + '/')
-            .header('Cookie', 'accepted_tos=20180523; view_adult=true')
-            .execute();
-        if (res && res.ok) return res.html();
-    } catch(e) {}
-    let res2 = fetch(url);
-    if (res2 && res2.ok) return res2.html();
-    return null;
+    const UA = 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36';
+    const HEADERS = {
+        'User-Agent': UA,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': BASE_URL + '/',
+        'Cookie': 'accepted_tos=20180523; view_adult=true'
+    };
+    let res = null;
+
+    // A. fetch(url, {headers}) — iOS verified work
+    try { res = fetch(url, { headers: HEADERS }); } catch (e) {}
+    // B. Http.get(url, {headers}) — alt API
+    if (!res) try { res = Http.get(url, { headers: HEADERS }); } catch (e) {}
+    // C. Builder chain Android
+    if (!res) {
+        try {
+            res = Http.get(url)
+                .header('User-Agent', UA)
+                .header('Accept', HEADERS.Accept)
+                .header('Accept-Language', HEADERS['Accept-Language'])
+                .header('Referer', HEADERS.Referer)
+                .header('Cookie', HEADERS.Cookie)
+                .execute();
+        } catch (e) {}
+    }
+    // D. fetch bare — last resort (chú ý: KHÔNG có Cookie → ao3 sẽ trả adult-warning page,
+    // nhưng vẫn parse được nếu trang đó có works)
+    if (!res) try { res = fetch(url); } catch (e) {}
+
+    if (!res) return null;
+    if (typeof res.ok !== 'undefined' && !res.ok) return null;
+    try { return res.html(); } catch (e) { return null; }
 }
 
 function listPageUrl(base, page) {
