@@ -5,18 +5,6 @@
   },
   "data": [
     {
-      "name": "MyReadingManga",
-      "author": "DrLee",
-      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/myreadingmanga/plugin.zip",
-      "version": 4,
-      "source": "https://myreadingmanga.info",
-      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/myreadingmanga/icon.png",
-      "description": "Read BL/Yaoi manga on MyReadingManga.info",
-      "type": "comic",
-      "locale": "en_US",
-      "tag": "nsfw"
-    },
-    {
       "name": "Cucumber Manga",
       "author": "DrLee",
       "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/cucumbermanga/plugin.zip",
@@ -24,18 +12,6 @@
       "source": "https://cucumbermanga.com",
       "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/cucumbermanga/icon.png",
       "description": "Đọc manga BL/Yaoi trên Cucumber Manga",
-      "type": "comic",
-      "locale": "vi_VN",
-      "tag": "nsfw"
-    },
-    {
-      "name": "Dualeotruyen GL",
-      "author": "DrLee",
-      "path": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/dualeotruyengl/plugin.zip",
-      "version": 8,
-      "source": "https://dualeotruyengl.com",
-      "icon": "https://raw.githubusercontent.com/meowquytoc-star/vbook-extensions/main/dualeotruyengl/icon.png",
-      "description": "Đọc truyện tranh GL (yuri) trên Dualeotruyen GL",
       "type": "comic",
       "locale": "vi_VN",
       "tag": "nsfw"
